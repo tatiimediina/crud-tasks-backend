@@ -1,67 +1,121 @@
-const { connectDB } = require('../db/database')
-
-const ctrl  = {}
-
-ctrl.getTasks = async (req, res)=>{
-    console.log('a')
-    const connection = await connectDB();
-
-    const [ results ] = await connection.query('SELECT * FROM tasks');
-
-    return res.json(results);
-
-    connection.end
-}
-ctrl.addTasks = async (req, res)=>{
-
-    const { title, description, isComplete }  = req.body
-    
-    const connection = await connectDB();
-
-    const conexion = await connection.query(`INSERT INTO tasks (title, description, isComplete) VALUES ("${title}","${description}",${isComplete})`)
-
-    res.send("tarea agregada")
-
-   connection.end
-
-}
-ctrl.getById = async(req,res)=>{
-
-    const id = req.params.id 
-
-    const connection = await connectDB();
+const { connectDB } = require('../db/database');
+const ctrl = {};
 
 
-    const results = await connection.query(`SELECT * FROM tasks WHERE id=?`, id)
-    
-   res.json(results[0])
+const validateTaskData = (title, description, isComplete) => {
+    if (typeof title !== 'string' || title.trim() === '' || title.length > 255) {
+        return { valid: false, message: 'El titulo debe ser una cadena no vacía de un máximo de 255 caracteres' };
+    }
+    if (typeof description !== 'string' || description.trim() === '') {
+        return { valid: false, message: 'La descripción debe ser una cadena no vacía.' };
+    }
+    if (typeof isComplete !== 'boolean') {
+        return { valid: false, message: 'isComplete debe ser un valor booleano.' };
+    }
+    return { valid: true };
+};
 
-   connection.end
+ctrl.getTasks = async (req, res) => {
+    try {
+        const connection = await connectDB();
+        const [results] = await connection.query('SELECT * FROM tasks');
+        return res.status(200).json(results);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: 'Error al obtener tareas' });
+    } finally {
+        connection.end(); //Se agrego el finally para que la conexión a la base se cierre aunque haya un error
+    }
+};
 
-}
-ctrl.deleteTasks = async(req,res)=>{
-    const id = parseInt(req.params.id )
+ctrl.addTasks = async (req, res) => {
+    const { title, description, isComplete } = req.body;
 
-    const connection = await connectDB();
+    const validation = validateTaskData(title, description, isComplete);
+    if (!validation.valid) {
+        return res.status(400).json({ error: validation.message });
+    }
 
-    const results = await connection.query(`DELETE FROM tasks WHERE id = ?`, id)
+    try {
+        const connection = await connectDB();
+        await connection.query('INSERT INTO tasks (title, description, isComplete) VALUES (?, ?, ?)', [title, description, isComplete]);
 
-    res.send("tarea eliminada")
+        return res.status(201).json({ message: 'Tarea añadida' });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: 'Error al añadir tarea' });
 
-}
+    } finally {
+        connection.end();
+    }
+};
+
+ctrl.getById = async (req, res) => {
+    const id = parseInt(req.params.id);
+
+    if (isNaN(id)) {
+        return res.status(400).json({ error: 'id no válido' });
+    }
+
+    try {
+        const connection = await connectDB();
+        const [results] = await connection.query('SELECT * FROM tasks WHERE id = ?', [id]);
+        connection.end();
+
+        if (results.length === 0) {
+            return res.status(404).json({ error: 'Tarea no encontrada' });
+        }
+
+        return res.status(200).json(results[0]);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: 'Error al obtener la tarea' });
+    }
+};
+
+ctrl.deleteTasks = async (req, res) => {
+    const id = parseInt(req.params.id);
+
+    if (isNaN(id)) {
+        return res.status(400).json({ error: 'id no válido' });
+    }
+
+    try {
+        const connection = await connectDB();
+        const [results] = await connection.query('DELETE FROM tasks WHERE id = ?', [id]);
+        connection.end();
+
+        return res.status(200).json({ message: 'Tarea eliminada' });
+        
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: 'Error al eliminar tarea' });
+    }
+};
 
 ctrl.editTasks = async (req, res) => {
     const id = parseInt(req.params.id);
     const { title, description, isComplete } = req.body;
-    const connection = await connectDB();
 
-    
-    const results = await connection.query(
-        `UPDATE tasks SET title = ?, description = ?, isComplete = ? WHERE id = ?`,
-        [title, description, isComplete, id] 
-    );
+    if (isNaN(id)) {
+        return res.status(400).json({ error: 'id no válido' });
+    }
 
-    res.json(results[0]);
+    const validation = validateTaskData(title, description, isComplete);
+    if (!validation.valid) {
+        return res.status(400).json({ error: validation.message });
+    }
+
+    try {
+        const connection = await connectDB();
+        const [results] = await connection.query('UPDATE tasks SET title = ?, description = ?, isComplete = ? WHERE id = ?', [title, description, isComplete, id]);
+        connection.end();
+
+        return res.status(200).json({ message: 'Tarea editada' });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: 'Error al editar tarea' });
+    }
 };
 
 module.exports = ctrl;
