@@ -23,9 +23,7 @@ ctrl.getTasks = async (req, res) => {
     } catch (error) {
         console.log(error);
         return res.status(500).json({ error: 'Error al obtener tareas' });
-    } finally {
-        connection.end(); //Se agrego el finally para que la conexión a la base se cierre aunque haya un error
-    }
+    } 
 };
 
 ctrl.addTasks = async (req, res) => {
@@ -45,9 +43,7 @@ ctrl.addTasks = async (req, res) => {
         console.log(error);
         return res.status(500).json({ error: 'Error al añadir tarea' });
 
-    } finally {
-        connection.end();
-    }
+    } 
 };
 
 ctrl.getById = async (req, res) => {
