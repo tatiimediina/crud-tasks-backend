@@ -50,7 +50,9 @@ ctrl.getById = async (req, res) => {
     const id = parseInt(req.params.id);
 
     if (isNaN(id)) {
-        return res.status(400).json({ error: 'id no válido' });
+        
+        return res.status(400).json({ error: 'id no válido' }) 
+        
     }
 
     try {
@@ -79,10 +81,14 @@ ctrl.deleteTasks = async (req, res) => {
     try {
         const connection = await connectDB();
         const [results] = await connection.query('DELETE FROM tasks WHERE id = ?', [id]);
-        connection.end();
 
-        return res.status(200).json({ message: 'Tarea eliminada' });
-        
+        if(res.status(404)){
+            res.send({message: "La tarea no existe"})
+        } else {
+        res.status(200).json({ message: 'Tarea eliminada' });
+        }
+
+        connection.end()
     } catch (error) {
         console.log(error);
         return res.status(500).json({ error: 'Error al eliminar tarea' });
@@ -105,9 +111,15 @@ ctrl.editTasks = async (req, res) => {
     try {
         const connection = await connectDB();
         const [results] = await connection.query('UPDATE tasks SET title = ?, description = ?, isComplete = ? WHERE id = ?', [title, description, isComplete, id]);
+
+        if(res.status(404)){
+            res.send({message: "La tarea no existe"})
+        } else {
+        res.status(200).json({ message: 'Tarea eliminada' });
+        }
         connection.end();
 
-        return res.status(200).json({ message: 'Tarea editada' });
+        
     } catch (error) {
         console.log(error);
         return res.status(500).json({ error: 'Error al editar tarea' });
