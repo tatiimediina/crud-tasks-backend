@@ -1,4 +1,4 @@
-﻿## crud-tasks-backend
+## crud-tasks-backend
 
 Este proyecto implementa un servidor Node.js y permite realizar operaciones CRUD para gestionar tareas. Utiliza Express como framework web y se conecta a una base de datos MySQL para almacenar la información de las tareas.
 
