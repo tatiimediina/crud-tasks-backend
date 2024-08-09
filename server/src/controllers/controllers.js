@@ -1,4 +1,5 @@
 import { connectDB } from "../db/database.js";
+import { validationResult } from "express-validator"
 
 export const validateTaskData = (title, description, isComplete) => {
     if (typeof title !== 'string' || title.trim() === '' || title.length > 255) {
@@ -25,6 +26,7 @@ export const getTasks = async (req, res) => {
 };
 
 export const addTasks = async (req, res) => {
+
     const { title, description, isComplete } = req.body;
 
     const validation = validateTaskData(title, description, isComplete);
@@ -94,9 +96,11 @@ export const deleteTasks = async (req, res) => {
 
 export const editTasks = async (req, res) => {
     const id = parseInt(req.params.id);
+
     const { title, description, isComplete } = req.body;
 
     if (isNaN(id)) {
+        console.log('nan')
         return res.status(400).json({ error: 'id no válido' });
     }
 
@@ -109,11 +113,8 @@ export const editTasks = async (req, res) => {
         const connection = await connectDB();
         const [results] = await connection.query('UPDATE tasks SET title = ?, description = ?, isComplete = ? WHERE id = ?', [title, description, isComplete, id]);
 
-        if(res.status(404)){
-            res.send({message: "La tarea no existe"})
-        } else {
-        res.status(200).json({ message: 'Tarea eliminada' });
-        }
+        res.status(200).json({ message: 'Tarea editada' });
+        
         connection.end();
 
         

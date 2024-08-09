@@ -5,9 +5,9 @@ import cors from 'cors';
 
 const app = express();
 
+app.use(json())
 app.use(morgan('dev'));
 app.use(cors());
-app.use(json())
 
 const port = process.env.port || 3000;
 
