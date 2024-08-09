@@ -1,16 +1,19 @@
-const express = require('express');
-const morgan = require('morgan');
-const cors = require('cors');
-const database = require('./db/database')
+import express, { json } from 'express';
+import morgan from 'morgan';
+import cors from 'cors';
+
+
 const app = express();
 
 app.use(morgan('dev'));
 app.use(cors());
-app.use(express.json())
+app.use(json())
 
 const port = process.env.port || 3000;
 
-app.use(require('./routes/app.routes'))
+import { router } from "./routes/app.routes.js"
+
+app.use('/tasks', router)
 
 app.listen(port,()=>{
     console.log(`server on port ${port}`)

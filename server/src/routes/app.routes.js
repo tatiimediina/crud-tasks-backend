@@ -1,11 +1,11 @@
-const { Router } = require('express');
-const { getTasks, addTasks, getById, deleteTasks, editTasks } = require('../controllers/controllers')
+import { Router } from 'express';
+import { getTasks, addTasks, getById, deleteTasks, editTasks } from '../controllers/controllers.js';
 const router = Router();
 
-router.get('/tasks', getTasks);
-router.post('/tasks',addTasks);
-router.get('/tasks/:id', getById);
-router.delete('/tasks/:id',deleteTasks);
-router.put('/tasks/:id', editTasks);
+router.get('/', getTasks);
+router.post('/',addTasks);
+router.get('/:id', getById);
+router.delete('/:id',deleteTasks);
+router.put('/:id', editTasks);
 
-module.exports = router;
+export { router };

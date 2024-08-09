@@ -1,8 +1,6 @@
-const { connectDB } = require('../db/database');
-const ctrl = {};
+import { connectDB } from "../db/database.js";
 
-
-const validateTaskData = (title, description, isComplete) => {
+export const validateTaskData = (title, description, isComplete) => {
     if (typeof title !== 'string' || title.trim() === '' || title.length > 255) {
         return { valid: false, message: 'El titulo debe ser una cadena no vacía de un máximo de 255 caracteres' };
     }
@@ -13,9 +11,9 @@ const validateTaskData = (title, description, isComplete) => {
         return { valid: false, message: 'isComplete debe ser un valor booleano.' };
     }
     return { valid: true };
-};
+}
 
-ctrl.getTasks = async (req, res) => {
+export const getTasks = async (req, res) => {
     try {
         const connection = await connectDB();
         const [results] = await connection.query('SELECT * FROM tasks');
@@ -26,7 +24,7 @@ ctrl.getTasks = async (req, res) => {
     } 
 };
 
-ctrl.addTasks = async (req, res) => {
+export const addTasks = async (req, res) => {
     const { title, description, isComplete } = req.body;
 
     const validation = validateTaskData(title, description, isComplete);
@@ -45,12 +43,11 @@ ctrl.addTasks = async (req, res) => {
 
     } 
 };
-
-ctrl.getById = async (req, res) => {
+export const getById = async (req, res) => {
     const id = parseInt(req.params.id);
 
     if (isNaN(id)) {
-        
+        console.log('')
         return res.status(400).json({ error: 'id no válido' }) 
         
     }
@@ -71,7 +68,7 @@ ctrl.getById = async (req, res) => {
     }
 };
 
-ctrl.deleteTasks = async (req, res) => {
+export const deleteTasks = async (req, res) => {
     const id = parseInt(req.params.id);
 
     if (isNaN(id)) {
@@ -95,7 +92,7 @@ ctrl.deleteTasks = async (req, res) => {
     }
 };
 
-ctrl.editTasks = async (req, res) => {
+export const editTasks = async (req, res) => {
     const id = parseInt(req.params.id);
     const { title, description, isComplete } = req.body;
 
@@ -126,4 +123,4 @@ ctrl.editTasks = async (req, res) => {
     }
 };
 
-module.exports = ctrl;
+
